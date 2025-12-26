@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUZUMA | Solar Intelligence System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Inter:wght@300;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007bff;
+            --secondary: #dc3545;
+            --dark: #0a192f;
+            --light: #f4f7f6;
+            --text-muted: #6c757d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        body { background-color: var(--light); color: #333; line-height: 1.6; }
+
+        /* NAVBAR */
+        nav {
+            background-color: var(--dark); color: white; padding: 1rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .logo-wrapper { display: flex; align-items: center; text-decoration: none; gap: 12px; }
+        .logo-img { height: 40px; width: auto; }
+        .logo-text { font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: bold; color: white; letter-spacing: 1px; }
+
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: #ccd6f6; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: 0.3s; cursor: pointer; }
+        .nav-links a:hover { color: var(--primary); }
+
+        /* HERO SECTION */
+        .hero {
+            position: relative;
+            background-image: linear-gradient(rgba(10, 25, 47, 0.7), rgba(10, 25, 47, 0.7)), 
+                              url('https://images.pexels.com/photos/356036/pexels-photo-356036.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+            background-size: cover; background-position: center; background-attachment: fixed;
+            height: 90vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: white; text-align: center; padding: 0 20px;
+        }
+        .hero h1 { font-family: 'Montserrat', sans-serif; font-size: 3.5rem; margin-bottom: 1rem; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .hero p { font-size: 1.2rem; max-width: 700px; margin-bottom: 2rem; color: #e0e0e0; }
+
+        /* SECTION STYLING */
+        section { padding: 100px 10%; }
+        .section-title { text-align: center; margin-bottom: 50px; }
+        .section-title h2 { font-family: 'Montserrat', sans-serif; font-size: 2rem; color: var(--dark); margin-bottom: 10px; text-transform: uppercase; }
+        .section-title .divider { width: 60px; height: 4px; background: var(--primary); margin: 0 auto; }
+
+        /* ABOUT & METODOLOGI */
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .about-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .about-card h3 { color: var(--primary); margin-bottom: 15px; }
+
+        .metodologi-bg { background-color: #fff; }
+        .step-container { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
+        .step-card { background: var(--light); padding: 40px 30px; border-radius: 12px; width: 300px; text-align: center; position: relative; border-bottom: 4px solid var(--primary); }
+        .step-number { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* --- BARIER / GATE --- */
+        .analysis-gate {
+            background: var(--dark); padding: 80px 10%; text-align: center; color: white; border-top: 5px solid var(--primary);
+        }
+        .gate-content { max-width: 600px; margin: 0 auto; }
+        .gate-content h2 { font-family: 'Montserrat', sans-serif; margin-bottom: 15px; }
+        .gate-content p { color: #ccd6f6; margin-bottom: 30px; }
+
+        /* --- HIDDEN ANALYSIS --- */
+        #analisis { display: none; background-color: var(--light); animation: fadeIn 1s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card-analisis { background: white; padding: 45px; border-radius: 25px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); border: 1px solid #eee; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        .input-group label { display: block; font-weight: 600; margin-bottom: 10px; font-size: 0.85rem; color: var(--dark); }
+        select, input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fdfdfd; font-size: 0.95rem; }
+
+        .btn-main {
+            background: linear-gradient(135deg, var(--primary), #0056b3); color: white; padding: 18px 45px; border-radius: 10px;
+            font-weight: bold; border: none; cursor: pointer; width: 100%; transition: 0.4s; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0, 123, 255, 0.4); }
+
+        .btn-gate {
+            background: var(--primary); color: white; padding: 15px 40px; border-radius: 30px; border: 2px solid var(--primary);
+            font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-gate:hover { background: transparent; color: var(--primary); }
+
+        /* HASIL */
+        #result-area { display: none; margin-top: 60px; padding-top: 40px; border-top: 2px dashed #ddd; }
+        .stat-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .stat-item { background: #ffffff; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
+        .stat-item span { display: block; font-size: 1.8rem; font-weight: bold; color: var(--dark); }
+
+        footer { background: var(--dark); color: #8892b0; text-align: center; padding: 50px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#home" class="logo-wrapper">
+            <img src="SUZUMA.png" alt="Logo" class="logo-img">
+            <div class="logo-text">SUZUMA</div>
+        </a>
+        <div class="nav-links">
+            <a href="#home">Beranda</a>
+            <a href="#about">Tentang</a>
+            <a href="#metodologi">Metodologi</a>
+            <a onclick="unlockAnalysis()">Analisis</a>
+        </div>
+    </nav>
+
+    <header id="home" class="hero">
+        <h1>Solar Analysis Engine</h1>
+        <p>Prediksi penurunan efisiensi panel surya berdasarkan sinkronisasi data radiasi & suhu satelit NASA di seluruh kota besar Pulau Jawa.</p>
+        <button onclick="unlockAnalysis()" class="btn-main" style="width: auto;">Cek Forecasting Sekarang</button>
+    </header>
+
+    <section id="about">
+        <div class="section-title">
+            <h2>Tentang Sistem</h2>
+            <div class="divider"></div>
+        </div>
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>Visi Teknologi</h3>
+                <p>SUZUMA hadir untuk memberikan transparansi data bagi pengguna PLTS di Pulau Jawa. Kami mengolah data cuaca ekstrem untuk menghitung depresiasi energi secara realistik.</p>
+            </div>
+            <div class="about-card">
+                <h3>Akurasi Data</h3>
+                <p>Menggunakan parameter koefisien suhu (Pmax) dan degradasi tahunan sesuai standar industri komponen Monocrystalline dan Polycrystalline global.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="metodologi" class="metodologi-bg">
+        <div class="section-title">
+            <h2>Metodologi Analisis</h2>
+            <div class="divider"></div>
+        </div>
+        <div class="step-container">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h4>NASA POWER Sync</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px;">Penentuan koordinat lokasi untuk mendapatkan rata-rata radiasi harian harian (kWh/m2).</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h4>Temperature Loss</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px;">Perhitungan Heat Derating jika suhu operasional di lokasi melebihi 25°C.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h4>Linear Degradation</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px;">Proyeksi penurunan output listrik secara tahunan selama masa beroperasi panel surya.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="analysis-gate" id="gate">
+        <div class="gate-content">
+            <h2>Siap Melakukan Analisis?</h2>
+            <p>Klik tombol di bawah untuk membuka panel forecasting dan menghitung estimasi efisiensi panel surya Anda.</p>
+            <button class="btn-gate" onclick="unlockAnalysis()">Buka Panel Analisis</button>
+        </div>
+    </div>
+
+    <section id="analisis">
+        <div class="section-title">
+            <h2>Parameter Forecasting</h2>
+            <div class="divider"></div>
+        </div>
+        <div class="card-analisis">
+            <div class="grid-inputs">
+                <div class="input-group">
+                    <label>Nama Kota (Pulau Jawa)</label>
+                    <select id="city">
+                        <optgroup label="Banten & Jakarta">
+                            <option value='{"temp":28.8, "rad":5.4}'>Jakarta Pusat/Utara</option>
+                            <option value='{"temp":28.4, "rad":5.3}'>Jakarta Selatan/Timur</option>
+                            <option value='{"temp":28.5, "rad":5.2}'>Tangerang / BSD</option>
+                            <option value='{"temp":28.2, "rad":5.1}'>Serang / Cilegon</option>
+                        </optgroup>
+                        <optgroup label="Jawa Barat">
+                            <option value='{"temp":23.2, "rad":4.8}'>Kota Bandung</option>
+                            <option value='{"temp":24.5, "rad":4.9}'>Bogor / Depok</option>
+                            <option value='{"temp":27.8, "rad":5.2}'>Cirebon / Indramayu</option>
+                            <option value='{"temp":28.1, "rad":5.4}'>Karawang / Bekasi</option>
+                        </optgroup>
+                        <optgroup label="Jawa Tengah & DIY">
+                            <option value='{"temp":28.1, "rad":5.3}'>Semarang</option>
+                            <option value='{"temp":26.8, "rad":5.2}'>Yogyakarta / Sleman</option>
+                            <option value='{"temp":27.5, "rad":5.2}'>Surakarta / Solo</option>
+                            <option value='{"temp":24.5, "rad":4.8}'>Wonosobo</option>
+                        </optgroup>
+                        <optgroup label="Jawa Timur">
+                            <option value='{"temp":29.5, "rad":5.6}'>Surabaya / Sidoarjo</option>
+                            <option value='{"temp":24.2, "rad":5.1}'>Malang / Batu</option>
+                            <option value='{"temp":28.7, "rad":5.7}'>Madura (Pamekasan)</option>
+                            <option value='{"temp":28.1, "rad":5.4}'>Banyuwangi</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Kapasitas (Wp)</label>
+                    <input type="number" id="capacity" value="450">
+                </div>
+                <div class="input-group">
+                    <label>Jenis Panel</label>
+                    <select id="panel-type">
+                        <option value="0.004">Monocrystalline (0.4%/thn)</option>
+                        <option value="0.008">Polycrystalline (0.8%/thn)</option>
+                        <option value="0.012">Thin Film (1.2%/thn)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Tahun Operasi</label>
+                    <input type="number" id="years" value="25">
+                </div>
+                <div class="input-group">
+                    <label>Efisiensi Awal (%)</label>
+                    <input type="number" id="init-eff" value="20" step="0.1">
+                </div>
+            </div>
+
+            <button class="btn-main" onclick="runAnalysis()">Mulai Kalkulasi Linear</button>
+
+            <div id="result-area">
+                <div class="stat-summary">
+                    <div class="stat-item"><small>Efisiensi Akhir</small><span id="end-val">0%</span></div>
+                    <div class="stat-item"><small>Produksi Harian Akhir</small><span id="daily-out">0 kWh</span></div>
+                    <div class="stat-item"><small>Total Degradasi Daya</small><span id="loss-val">0 Wp</span></div>
+                    <div class="stat-item"><small>Persentase Penurunan</small><span id="drop-percent" style="color: var(--secondary);">0%</span></div>
+                </div>
+                <div style="background: #fff; padding: 25px; border-radius: 15px; border: 1px solid #eee; height: 450px;">
+                    <canvas id="solarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 SUZUMA Intelligence System. Analisis berdasarkan standar STC (Standard Test Conditions).</p>
+    </footer>
+
+    <script>
+        let chartInstance = null;
+
+        function unlockAnalysis() {
+            document.getElementById('analisis').style.display = 'block';
+            document.getElementById('gate').style.display = 'none';
+            setTimeout(() => {
+                window.scrollTo({ top: document.getElementById('analisis').offsetTop - 70, behavior: 'smooth' });
+            }, 100);
+        }
+
+        function runAnalysis() {
+            const cityData = JSON.parse(document.getElementById('city').value);
+            const capacityWp = parseFloat(document.getElementById('capacity').value);
+            const degRate = parseFloat(document.getElementById('panel-type').value);
+            const years = parseInt(document.getElementById('years').value);
+            const initEff = parseFloat(document.getElementById('init-eff').value);
+
+            const heatLoss = (cityData.temp > 25) ? (cityData.temp - 25) * 0.4 : 0;
+            let efficiencyAfterTemp = initEff * (1 - (heatLoss / 100));
+
+            let labels = [];
+            let kwhDataset = [];
+            let effDataset = [];
+            let finalEff = 0;
+
+            for(let i=0; i <= years; i++) {
+                labels.push("Tahun " + i);
+                let currentEff = efficiencyAfterTemp * Math.pow((1 - degRate), i);
+                let currentKwh = (capacityWp / 1000) * (currentEff / initEff) * cityData.rad;
+                
+                kwhDataset.push(currentKwh.toFixed(2));
+                effDataset.push(currentEff.toFixed(2));
+                if(i === years) finalEff = currentEff;
+            }
+
+            document.getElementById('result-area').style.display = 'block';
+            document.getElementById('end-val').innerText = finalEff.toFixed(2) + "%";
+            document.getElementById('daily-out').innerText = kwhDataset[years] + " kWh";
+            const finalPower = capacityWp * (finalEff / initEff);
+            document.getElementById('loss-val').innerText = (capacityWp - finalPower).toFixed(0) + " Wp";
+            document.getElementById('drop-percent').innerText = (((initEff - finalEff)/initEff)*100).toFixed(1) + "%";
+
+            const ctx = document.getElementById('solarChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Output Energi (kWh)',
+                            data: kwhDataset,
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            yAxisID: 'y',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Efisiensi Panel (%)',
+                            data: effDataset,
+                            borderColor: '#dc3545',
+                            backgroundColor: 'transparent',
+                            yAxisID: 'y1',
+                            borderDash: [5, 5],
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Energi (kWh)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'Efisiensi (%)' }
+                        }
+                    }
+                }
+            });
+
+            setTimeout(() => {
+                window.scrollTo({ top: document.getElementById('result-area').offsetTop - 50, behavior: 'smooth' });
+            }, 100);
+        }
+    </script>
+</body>
+</html>
