@@ -10,6 +10,7 @@
         :root {
             --primary: #007bff;
             --secondary: #dc3545;
+            --success: #28a745;
             --dark: #0a192f;
             --light: #f4f7f6;
             --text-muted: #6c757d;
@@ -90,13 +91,27 @@
         }
         .btn-gate:hover { background: transparent; color: var(--primary); }
 
-        /* HASIL */
+        /* HASIL & REKOMENDASI */
         #result-area { display: none; margin-top: 60px; padding-top: 40px; border-top: 2px dashed #ddd; }
         .stat-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
         .stat-item { background: #ffffff; padding: 25px; border-radius: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
         .stat-item span { display: block; font-size: 1.8rem; font-weight: bold; color: var(--dark); }
 
+        .insight-container { 
+            margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+        }
+        .insight-box { 
+            background: #f8fafc; padding: 30px; border-radius: 15px; border-left: 5px solid var(--primary);
+        }
+        .insight-box h4 { margin-bottom: 15px; color: var(--dark); display: flex; align-items: center; gap: 10px; }
+        .insight-box ul { padding-left: 20px; font-size: 0.9rem; color: #444; }
+        .insight-box ul li { margin-bottom: 8px; }
+
         footer { background: var(--dark); color: #8892b0; text-align: center; padding: 50px; font-size: 0.9rem; }
+        
+        @media (max-width: 992px) {
+            .insight-container { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -156,7 +171,7 @@
             <div class="step-card">
                 <div class="step-number">3</div>
                 <h4>Linear Degradation</h4>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px;">Proyeksi penurunan output listrik secara tahunan selama masa beroperasi panel surya.</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px;">Proyeksi penurunan output listrik secara tahunan selama masa garansi panel surya.</p>
             </div>
         </div>
     </section>
@@ -236,8 +251,22 @@
                     <div class="stat-item"><small>Total Degradasi Daya</small><span id="loss-val">0 Wp</span></div>
                     <div class="stat-item"><small>Persentase Penurunan</small><span id="drop-percent" style="color: var(--secondary);">0%</span></div>
                 </div>
-                <div style="background: #fff; padding: 25px; border-radius: 15px; border: 1px solid #eee; height: 450px;">
+                
+                <div style="background: #fff; padding: 25px; border-radius: 15px; border: 1px solid #eee; height: 400px;">
                     <canvas id="solarChart"></canvas>
+                </div>
+
+                <div class="insight-container">
+                    <div class="insight-box">
+                        <h4>📊 Interpretasi Grafik</h4>
+                        <ul id="graph-interpretation">
+                            </ul>
+                    </div>
+                    <div class="insight-box" style="border-left-color: var(--success);">
+                        <h4>💡 Rekomendasi Pemasangan</h4>
+                        <ul id="installation-advice">
+                            </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -283,13 +312,33 @@
                 if(i === years) finalEff = currentEff;
             }
 
+            // Update UI Stats
             document.getElementById('result-area').style.display = 'block';
             document.getElementById('end-val').innerText = finalEff.toFixed(2) + "%";
             document.getElementById('daily-out').innerText = kwhDataset[years] + " kWh";
             const finalPower = capacityWp * (finalEff / initEff);
+            const totalDropPercent = (((initEff - finalEff)/initEff)*100).toFixed(1);
             document.getElementById('loss-val').innerText = (capacityWp - finalPower).toFixed(0) + " Wp";
-            document.getElementById('drop-percent').innerText = (((initEff - finalEff)/initEff)*100).toFixed(1) + "%";
+            document.getElementById('drop-percent').innerText = totalDropPercent + "%";
 
+            // -- GENERATE INSIGHTS --
+            const interpretList = document.getElementById('graph-interpretation');
+            const adviceList = document.getElementById('installation-advice');
+            
+            interpretList.innerHTML = `
+                <li>Garis <b>Biru</b> menunjukkan tren penurunan produksi listrik harian dari ${kwhDataset[0]} kWh menjadi ${kwhDataset[years]} kWh.</li>
+                <li>Garis <b>Merah (Putus-putus)</b> memvisualisasikan degradasi efisiensi material panel sebesar ${degRate*100}% per tahun.</li>
+                <li>Penurunan total sebesar ${totalDropPercent}% disebabkan oleh kombinasi akumulasi panas lokasi (${cityData.temp}°C) dan usia teknis komponen.</li>
+            `;
+
+            adviceList.innerHTML = `
+                <li><b>Ventilasi:</b> Pastikan ada celah minimal 10cm antara panel dan atap untuk mengurangi <i>Heat Loss</i> akibat suhu lokasi yang mencapai ${cityData.temp}°C.</li>
+                <li><b>Kemiringan:</b> Gunakan sudut 10°-15° menghadap Utara/Selatan (sesuai posisi lintang) agar pembersihan mandiri saat hujan maksimal.</li>
+                <li><b>Proteksi:</b> Karena degradasi mencapai ${totalDropPercent}% dalam ${years} tahun, pertimbangkan penggunaan Inverter dengan efisiensi tinggi (Tier 1) untuk menekan rugi-rugi sistem.</li>
+                <li><b>Maintenance:</b> Lakukan pembersihan debu setiap 2-3 bulan sekali untuk menjaga angka radiasi tetap optimal di angka ${cityData.rad} kWh/m².</li>
+            `;
+
+            // Draw Chart
             const ctx = document.getElementById('solarChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
@@ -320,20 +369,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
                     scales: {
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            title: { display: true, text: 'Energi (kWh)' }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            grid: { drawOnChartArea: false },
-                            title: { display: true, text: 'Efisiensi (%)' }
-                        }
+                        y: { position: 'left', title: { display: true, text: 'Energi (kWh)' } },
+                        y1: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Efisiensi (%)' } }
                     }
                 }
             });
